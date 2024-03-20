@@ -11,12 +11,18 @@ function AccountOperations() {
 
   const dispatch = useDispatch();
   const account = useSelector((state) => state.account);
-  const { balance, customerLoanPurpose = loanPurpose, loan } = account;
+  const {
+    balance,
+    loanPurpose: customerLoanPurpose,
+    loan,
+    isLoading,
+  } = account;
 
   function handleDeposit() {
     if (!depositAmount) return;
-    dispatch(deposit(depositAmount));
+    dispatch(deposit(depositAmount, currency));
     setDepositAmount("");
+    setCurrency("USD");
   }
 
   function handleWithdrawal() {
@@ -28,6 +34,7 @@ function AccountOperations() {
   function handleRequestLoan() {
     if (!loanAmount || !loanPurpose) return;
     dispatch(requestLoan(loanAmount, loanPurpose));
+    setLoanAmount("");
     setLoanPurpose("");
   }
 
@@ -55,7 +62,9 @@ function AccountOperations() {
             <option value="GBP">British Pound</option>
           </select>
 
-          <button onClick={handleDeposit}>Deposit {depositAmount}</button>
+          <button onClick={handleDeposit} disabled={isLoading}>
+            {isLoading ? "Converting..." : `Deposit ${depositAmount}`}
+          </button>
         </div>
 
         <div>
@@ -86,10 +95,14 @@ function AccountOperations() {
           <button onClick={handleRequestLoan}>Request loan</button>
         </div>
 
-        <div>
-          <span>Pay back ${loan}</span>
-          <button onClick={handlePayLoan}>Pay loan</button>
-        </div>
+        {loan > 0 && (
+          <div>
+            <span>
+              Pay back ${loan} ({customerLoanPurpose})
+            </span>
+            <button onClick={handlePayLoan}>Pay loan</button>
+          </div>
+        )}
       </div>
     </div>
   );
